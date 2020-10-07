@@ -1,0 +1,4 @@
+include ':notifications'
+include ':router'
+include ':app'
+rootProject.name = "RouteDemoApp"
