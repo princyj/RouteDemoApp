@@ -17,7 +17,7 @@ data class Route(
     val activity: AppCompatActivity,
     @IdRes val containerViewIdRes: Int,
     val presentationType: PresentationType = PresentationType.DEFAULT
-)
+    )
 
 enum class PresentationType {
     DEFAULT,
@@ -27,7 +27,6 @@ enum class PresentationType {
 
 sealed class RouteAction {
     data class Navigation(val fragment: Class<out Fragment>) : RouteAction()
-    object REDIRECT : RouteAction()
 }
 
 class URLMatcher {

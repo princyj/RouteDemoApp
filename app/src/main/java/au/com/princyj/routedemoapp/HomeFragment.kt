@@ -18,5 +18,6 @@ class HomeFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         index.text = arguments?.getInt("INDEX").toString()
+        arguments?.putString("CLICK", "Home")
     }
 }

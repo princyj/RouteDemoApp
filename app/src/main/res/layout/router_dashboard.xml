@@ -13,7 +13,15 @@
         android:layout_weight="0"
         android:gravity="center"
         android:id="@+id/nav_to_navigation"
-        android:text="Go to Notifications"/>
+        android:text="Go to Notifications Tab"/>
+
+    <Button
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_weight="0"
+        android:gravity="center"
+        android:id="@+id/nav_to_child"
+        android:text="Go to Dashboard Child Screen"/>
 
     <TextView
         android:layout_width="match_parent"
@@ -21,5 +29,4 @@
         android:gravity="center"
         android:id="@+id/index"
         android:layout_weight="1"/>
-
 </LinearLayout>

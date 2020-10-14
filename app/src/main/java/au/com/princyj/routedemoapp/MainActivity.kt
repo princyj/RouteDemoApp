@@ -1,7 +1,7 @@
 package au.com.princyj.routedemoapp
 
+import android.content.Intent
 import android.os.Bundle
-import android.view.Menu
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
 import au.com.princyj.notifications.RedHandler
@@ -86,7 +86,20 @@ class MainActivity : AppCompatActivity() {
 
     }
 
-    override fun onCreateOptionsMenu(menu: Menu?): Boolean {
-        return super.onCreateOptionsMenu(menu)
+    class AccentChildHandler : RouteHandler {
+
+        override fun handles(url: URL): Boolean {
+            return URLMatcher.pathMatches("/accent_child", url)
+        }
+
+        override fun action(route: Route): RouteAction = RouteAction.Navigation(DashboardChildFragment::class.java)
+
+    }
+
+    public override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+        for (fragment in supportFragmentManager.fragments) {
+            fragment.onActivityResult(requestCode, resultCode, data)
+        }
     }
 }
