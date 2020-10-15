@@ -12,4 +12,12 @@
         android:layout_margin="36dp"
         android:gravity="center"/>
 
+    <Button
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_weight="0"
+        android:gravity="center"
+        android:id="@+id/nav_to_navigation"
+        android:text="Go to Parent"/>
+
 </LinearLayout>

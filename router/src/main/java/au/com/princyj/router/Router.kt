@@ -2,6 +2,7 @@ package au.com.princyj.router
 
 import android.app.Activity
 import android.content.Intent
+import android.os.Bundle
 import androidx.annotation.IdRes
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
@@ -36,17 +37,20 @@ class Router(handlers: List<RouteHandler>) {
     }
 
     private fun createChildFragmentInstance(fragment: Fragment, activity: AppCompatActivity, @IdRes containerViewIdRes: Int) {
-        fragment.setTargetFragment(fragment.parentFragment, 1)
-        fragment.parentFragment?.let {
-            it.childFragmentManager.beginTransaction()
-                .replace(containerViewIdRes, fragment)
-                .addToBackStack(null)
-                .commit()
-        }
-        activity.supportFragmentManager?.popBackStackImmediate()
+        val parentFragment = activity.supportFragmentManager.findFragmentById(containerViewIdRes)!!
+        fragment.setTargetFragment(parentFragment, 1)
+        val fragmentManager = parentFragment.fragmentManager
+        fragmentManager?.beginTransaction()
+            ?.replace(containerViewIdRes, fragment)
+            ?.addToBackStack(null)
+            ?.commit()
+    }
+
+    fun resultAndOK(fragment: Fragment, data: Bundle) {
+        fragment.fragmentManager?.popBackStackImmediate()
         val intent = Intent()
-        intent.putExtra("bundle", fragment.arguments)
-        fragment.parentFragment?.onActivityResult(1, Activity.RESULT_OK, intent)
+        intent.putExtras(data)
+        fragment.targetFragment?.onActivityResult(1, Activity.RESULT_OK, intent)
     }
 
     private fun createFragmentInstance(fragment: Fragment, activity: AppCompatActivity, @IdRes containerViewIdRes: Int) {

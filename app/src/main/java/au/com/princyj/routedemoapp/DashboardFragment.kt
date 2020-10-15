@@ -56,23 +56,22 @@ class DashboardFragment : Fragment() {
         nav_to_child.setOnClickListener {
             val route = Route(
                 URL("https://router.com.au/accent_child"),
-                this.arguments,
+                null,
                 this.activity as AppCompatActivity,
                 R.id.container,
                 PresentationType.CHILD
             )
             router.routeToFragment(route)
         }
-
-        Log.d("child", arguments?.getBoolean("BOOLEAN_VALUE").toString())
-
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
-        if (resultCode == Activity.RESULT_OK) {
-            val test = arguments?.getBoolean("BOOLEAN_VALUE")
-            Log.d("child", test.toString())
-        }
+            if (resultCode == Activity.RESULT_OK) {
+                val test = data?.let {
+                    it.extras?.getBoolean("BOOLEAN_VALUE")
+                }
+                Log.d("child", test.toString())
+            }
     }
 }
