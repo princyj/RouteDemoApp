@@ -7,10 +7,9 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.appcompat.app.AppCompatActivity
+import android.widget.Toast
 import androidx.fragment.app.Fragment
 import au.com.princyj.notifications.RedHandler
-import au.com.princyj.router.PresentationType
 import au.com.princyj.router.Route
 import au.com.princyj.router.Router
 import kotlinx.android.synthetic.main.router_dashboard.*
@@ -45,7 +44,7 @@ class DashboardFragment : Fragment() {
         val route = Route(
             URL("https://router.com.au/red"),
             notificationBundle,
-            activity as AppCompatActivity,
+            this.parentFragmentManager,
             R.id.container
         )
 
@@ -57,11 +56,10 @@ class DashboardFragment : Fragment() {
             val route = Route(
                 URL("https://router.com.au/accent_child"),
                 null,
-                this.activity as AppCompatActivity,
-                R.id.container,
-                PresentationType.CHILD
+                this.parentFragmentManager,
+                R.id.container
             )
-            router.routeToFragment(route)
+            router.routeToFragmentWithResultOK(route)
         }
     }
 
@@ -72,6 +70,7 @@ class DashboardFragment : Fragment() {
                     it.extras?.getBoolean("BOOLEAN_VALUE")
                 }
                 Log.d("child", test.toString())
+                Toast.makeText(this.context, test.toString(), Toast.LENGTH_LONG).show()
             }
     }
 }

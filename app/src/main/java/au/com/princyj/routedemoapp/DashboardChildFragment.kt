@@ -31,7 +31,7 @@ class DashboardChildFragment : Fragment() {
         val bundle = Bundle()
         bundle.putBoolean("BOOLEAN_VALUE", true)
         nav_to_navigation.setOnClickListener {
-            router.resultAndOK(this, bundle)
+            router.returnResultOnOK(this, bundle)
         }
     }
 }

@@ -2,32 +2,31 @@ package au.com.princyj.router
 
 import android.os.Bundle
 import androidx.annotation.IdRes
-import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.FragmentManager
 import java.net.URL
 
 interface RouteHandler {
     fun handles(url: URL): Boolean
-    fun action(route: Route): RouteAction
+    fun action(route: Route): RouteActionType
 }
 
 data class Route(
     val url: URL,
     val bundle: Bundle?,
-    val activity: AppCompatActivity,
-    @IdRes val containerViewIdRes: Int,
-    val presentationType: PresentationType = PresentationType.DEFAULT
-    )
+    val fragmentManager: FragmentManager,
+    @IdRes val containerViewIdRes: Int
+)
 
-enum class PresentationType {
-    DEFAULT,
-    CHILD
+data class RouterEntity(val routePath: String, val navigationType: RouteActionType)
+
+sealed class RouteActionType {
+    data class Navigation(val destination: Class<out Fragment>) : RouteActionType()
+    object Sequence : RouteActionType()
 }
 
+//redirect -> Bolt(not logged in) -> redirect to Login screen
 
-sealed class RouteAction {
-    data class Navigation(val fragment: Class<out Fragment>) : RouteAction()
-}
 
 class URLMatcher {
     companion object {

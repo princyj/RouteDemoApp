@@ -32,7 +32,7 @@ class MainActivity : AppCompatActivity() {
 
 
         bundle.putInt("INDEX", 0)
-        val route = Route(URL("https://router.com.au/blue"), bundle, this, R.id.container)
+        val route = Route(URL("https://router.com.au/blue"), bundle, this.supportFragmentManager, R.id.container)
 
         router.routeToFragment(route)
 
@@ -47,17 +47,17 @@ class MainActivity : AppCompatActivity() {
             when (it.itemId) {
                 R.id.home -> {
                     bundle.putInt("COUNT", count)
-                    val route = Route(URL("https://router.com.au/blue"), bundle, this, R.id.container)
+                    val route = Route(URL("https://router.com.au/blue"), bundle, this.supportFragmentManager, R.id.container)
                     router.routeToFragment(route)
                     true
                 }
                 R.id.dashboard -> {
-                    val route = Route(URL("https://router.com.au/accent"), dashboardBundle, this, R.id.container)
+                    val route = Route(URL("https://router.com.au/accent"), dashboardBundle, this.supportFragmentManager, R.id.container)
                     router.routeToFragment(route)
                     true
                 }
                 R.id.notifications -> {
-                    val route = Route(URL("https://router.com.au/red"), notificationBundle, this, R.id.container)
+                    val route = Route(URL("https://router.com.au/red"), notificationBundle, this.supportFragmentManager, R.id.container)
                     router.routeToFragment(route)
                     true
                 }
@@ -72,7 +72,7 @@ class MainActivity : AppCompatActivity() {
             return URLMatcher.pathMatches("/accent", url)
         }
 
-        override fun action(route: Route): RouteAction = RouteAction.Navigation(DashboardFragment::class.java)
+        override fun action(route: Route): RouteActionType = RouteActionType.Navigation(DashboardFragment::class.java)
 
     }
 
@@ -82,7 +82,7 @@ class MainActivity : AppCompatActivity() {
             return URLMatcher.pathMatches("/blue", url)
         }
 
-        override fun action(route: Route): RouteAction = RouteAction.Navigation(HomeFragment::class.java)
+        override fun action(route: Route): RouteActionType = RouteActionType.Navigation(HomeFragment::class.java)
 
     }
 
@@ -92,7 +92,7 @@ class MainActivity : AppCompatActivity() {
             return URLMatcher.pathMatches("/accent_child", url)
         }
 
-        override fun action(route: Route): RouteAction = RouteAction.Navigation(DashboardChildFragment::class.java)
+        override fun action(route: Route): RouteActionType = RouteActionType.Navigation(DashboardChildFragment::class.java)
 
     }
 

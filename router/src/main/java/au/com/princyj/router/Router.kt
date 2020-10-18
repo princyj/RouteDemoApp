@@ -4,11 +4,14 @@ import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
 import androidx.annotation.IdRes
-import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.FragmentManager
+
+private const val EXTRA_NAME_RESULT = "EXTRA_NAME_RESULT"
 
 class Router(handlers: List<RouteHandler>) {
     private val routeHandlers: List<RouteHandler>?
+
 
     init {
         this.routeHandlers = handlers
@@ -17,56 +20,75 @@ class Router(handlers: List<RouteHandler>) {
     fun routeToFragment(route: Route) {
         val fragment = handleRoute(route)?.newInstance()
         route.bundle?.let { fragment?.arguments = it }
-        when (route.presentationType) {
-            PresentationType.DEFAULT -> fragment?.let {
-                createFragmentInstance(
+        fragment?.let {
+                launchFragmentInstance(
                     it,
-                    route.activity,
+                    route.fragmentManager,
                     route.containerViewIdRes
                 )
             }
-            PresentationType.CHILD -> fragment?.let {
-                createChildFragmentInstance(
-                    it,
-                    route.activity,
-                    route.containerViewIdRes
-                )
-            }
+    }
+
+    fun routeToFragmentWithResultOK(route: Route) {
+        val fragment = handleRoute(route)?.newInstance()
+        route.bundle?.let { fragment?.arguments = it }
+        fragment?.let {
+            launchFragmentWithResultOK(
+                it,
+                route.fragmentManager,
+                route.containerViewIdRes
+            )
         }
-        fragment?.let { createFragmentInstance(it, route.activity, route.containerViewIdRes) }
     }
 
-    private fun createChildFragmentInstance(fragment: Fragment, activity: AppCompatActivity, @IdRes containerViewIdRes: Int) {
-        val parentFragment = activity.supportFragmentManager.findFragmentById(containerViewIdRes)!!
+    private fun launchFragmentInstance(fragment: Fragment, fragmentManager: FragmentManager, @IdRes containerViewIdRes: Int) {
+        fragmentManager.beginTransaction()
+            .replace(containerViewIdRes, fragment)
+            .addToBackStack(null)
+            .commit()
+    }
+
+    private fun launchFragmentWithResultOK(fragment: Fragment, fragmentManager: FragmentManager, @IdRes containerViewIdRes: Int) {
+        val parentFragment = fragmentManager.findFragmentById(containerViewIdRes)!!
+        fragmentManager.beginTransaction()
+            .replace(containerViewIdRes, fragment)
+            .addToBackStack(null)
+            .commit()
         fragment.setTargetFragment(parentFragment, 1)
-        val fragmentManager = parentFragment.fragmentManager
-        fragmentManager?.beginTransaction()
-            ?.replace(containerViewIdRes, fragment)
-            ?.addToBackStack(null)
-            ?.commit()
     }
 
-    fun resultAndOK(fragment: Fragment, data: Bundle) {
-        fragment.fragmentManager?.popBackStackImmediate()
+    fun returnResultOnOK(fragment: Fragment, data: Bundle) {
         val intent = Intent()
         intent.putExtras(data)
         fragment.targetFragment?.onActivityResult(1, Activity.RESULT_OK, intent)
-    }
-
-    private fun createFragmentInstance(fragment: Fragment, activity: AppCompatActivity, @IdRes containerViewIdRes: Int) {
-            activity.supportFragmentManager.beginTransaction()
-                .replace(containerViewIdRes, fragment)
-                .addToBackStack(null)
-                .commit()
+        fragment.fragmentManager?.popBackStackImmediate()
     }
 
     private fun handleRoute(route: Route): Class<out Fragment>? {
         val handler = routeHandlers?.first { it.handles(route.url) }
-        val action = handler?.action(route)
 
-        return when (action) {
-            is RouteAction.Navigation -> action.fragment
+        return when (val action = handler?.action(route)) {
+            is RouteActionType.Navigation -> action.destination
             else -> null
         }
     }
+//
+//    val routerEntityList = mutableListOf<RouterEntity>()
+//
+//    fun registerRouterEntity(routerEntity: RouterEntity):Boolean{
+//        val oldRouter = routerEntityList.firstOrNull{it.routePath.equals(routerEntity.routePath)}
+//        if(oldRouter==null) {
+//            routerEntityList.add(routerEntity)
+//            return true
+//        }
+//        else{
+//            return false
+//        }
+//    }
+//
+//    private fun getRouteNavigationType(route: Route) : RouteActionType? {
+//        val routerEntity = routerEntityList.firstOrNull{URLMatcher.pathMatches(it.routePath, route.url)}
+//        return routerEntity?.navigationType
+//    }
+
 }
