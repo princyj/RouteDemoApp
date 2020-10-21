@@ -3,55 +3,50 @@ package au.com.princyj.router
 import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
-import androidx.annotation.IdRes
+import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
 
 private const val EXTRA_NAME_RESULT = "EXTRA_NAME_RESULT"
 
-class Router(handlers: List<RouteHandler>) {
+class Router(handlers: List<RouteHandler>, tabSwitchHandler: (route: Route) -> Unit = {}) {
     private val routeHandlers: List<RouteHandler>?
-
+    private val tabSwitchActionHandlerCallback: (route: Route) -> Unit
 
     init {
         this.routeHandlers = handlers
+        this.tabSwitchActionHandlerCallback = tabSwitchHandler
     }
 
     fun routeToFragment(route: Route) {
-        val fragment = handleRoute(route)?.newInstance()
-        route.bundle?.let { fragment?.arguments = it }
-        fragment?.let {
-                launchFragmentInstance(
-                    it,
-                    route.fragmentManager,
-                    route.containerViewIdRes
-                )
-            }
+        executeAction(handleRoute(route), route)
     }
 
     fun routeToFragmentWithResultOK(route: Route) {
-        val fragment = handleRoute(route)?.newInstance()
-        route.bundle?.let { fragment?.arguments = it }
-        fragment?.let {
-            launchFragmentWithResultOK(
-                it,
-                route.fragmentManager,
-                route.containerViewIdRes
-            )
-        }
+        executeAction(handleRoute(route), route, true)
     }
 
-    private fun launchFragmentInstance(fragment: Fragment, fragmentManager: FragmentManager, @IdRes containerViewIdRes: Int) {
-        fragmentManager.beginTransaction()
-            .replace(containerViewIdRes, fragment)
+    private fun handleRoute(route: Route): RouteActionType {
+        val handler = routeHandlers?.first { it.handles(route.url) }
+        return handler?.action(route)!!
+    }
+
+    private fun launchFragmentInstance(
+        fragment: Fragment,
+        route: Route
+    ) {
+        route.fragmentManager.beginTransaction()
+            .replace(route.containerViewIdRes, fragment)
             .addToBackStack(null)
             .commit()
     }
 
-    private fun launchFragmentWithResultOK(fragment: Fragment, fragmentManager: FragmentManager, @IdRes containerViewIdRes: Int) {
-        val parentFragment = fragmentManager.findFragmentById(containerViewIdRes)!!
-        fragmentManager.beginTransaction()
-            .replace(containerViewIdRes, fragment)
+    private fun launchFragmentWithResultOK(
+        fragment: Fragment, route: Route
+    ) {
+        val parentFragment = route.fragmentManager.findFragmentById(route.containerViewIdRes)!!
+        route.fragmentManager.beginTransaction()
+            .replace(route.containerViewIdRes, fragment)
             .addToBackStack(null)
             .commit()
         fragment.setTargetFragment(parentFragment, 1)
@@ -64,13 +59,61 @@ class Router(handlers: List<RouteHandler>) {
         fragment.fragmentManager?.popBackStackImmediate()
     }
 
-    private fun handleRoute(route: Route): Class<out Fragment>? {
-        val handler = routeHandlers?.first { it.handles(route.url) }
-
-        return when (val action = handler?.action(route)) {
-            is RouteActionType.Navigation -> action.destination
-            else -> null
+    private fun executeAction(
+        action: RouteActionType,
+        route: Route,
+        withOKResult: Boolean = false
+    ) {
+        when (action) {
+            is RouteActionType.Navigation -> handleNavigation(route, action, withOKResult)
+            is RouteActionType.TabSwitch -> handleTabSwitch(route)
+            is RouteActionType.Sequence -> executeActions(action.actions, route)
         }
+    }
+
+    private fun executeActions(actions: List<RouteActionType>, route: Route) {
+        var newRoute: Route?
+        if (actions.isEmpty()) return
+        val mutableList = actions.toMutableList()
+
+        val next = mutableList.first()
+        mutableList.remove(next)
+//        if (next is RouteActionType.Navigation) {
+//            val f = next.destination
+//            val parentFragment = route.fragmentManager.findFragmentById(route.containerViewIdRes)!!
+//        }
+
+        executeAction(next, route)
+//        newRoute = Route(route.url, route.bundle, route.fragmentManager, route.containerViewIdRes)
+
+        executeActions(mutableList, route)
+
+    }
+
+    private fun handleTabSwitch(route: Route) {
+        tabSwitchActionHandlerCallback.invoke(route)
+    }
+
+    private fun handleNavigation(
+        route: Route,
+        actionType: RouteActionType.Navigation,
+        withOKResult: Boolean
+    ) {
+        val fragment = actionType.destination.newInstance()
+        route.bundle?.let { fragment.arguments = it }
+        if (fragment is DialogFragment) {
+            launchDialogFragment(fragment, route.fragmentManager)
+        } else {
+            if (withOKResult) {
+                launchFragmentWithResultOK(fragment, route)
+            } else {
+                launchFragmentInstance(fragment, route)
+            }
+        }
+    }
+
+    private fun launchDialogFragment(fragment: DialogFragment, fragmentManager: FragmentManager) {
+        fragment.show(fragmentManager, fragment.tag)
     }
 //
 //    val routerEntityList = mutableListOf<RouterEntity>()

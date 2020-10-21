@@ -5,18 +5,13 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
-import au.com.princyj.notifications.RedHandler
-import au.com.princyj.router.Router
+import au.com.princyj.router.Environment
+import au.com.princyj.router.Route
 import kotlinx.android.synthetic.main.dashboard_child.*
+import java.net.URL
 
 class DashboardChildFragment : Fragment() {
-
-    val handlers = listOf(
-        RedHandler(),
-        MainActivity.AccentChildHandler(),
-        MainActivity.BlueHandler()
-    )
-    val router = Router(handlers)
+    val router = Environment.shared.router
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -32,6 +27,18 @@ class DashboardChildFragment : Fragment() {
         bundle.putBoolean("BOOLEAN_VALUE", true)
         nav_to_navigation.setOnClickListener {
             router.returnResultOnOK(this, bundle)
+        }
+
+        tab_switch_to_home.setOnClickListener {
+            val route = this.targetFragment?.parentFragmentManager?.let { it1 ->
+                Route(
+                    URL("https://router.com.au/homeblue"),
+                    null,
+                    it1,
+                    R.id.container
+                )
+            }
+            route?.let { router.routeToFragment(it) }
         }
     }
 }

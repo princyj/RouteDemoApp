@@ -9,9 +9,8 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
 import androidx.fragment.app.Fragment
-import au.com.princyj.notifications.RedHandler
+import au.com.princyj.router.Environment
 import au.com.princyj.router.Route
-import au.com.princyj.router.Router
 import kotlinx.android.synthetic.main.router_dashboard.*
 import java.net.URL
 
@@ -19,12 +18,12 @@ import java.net.URL
 class DashboardFragment : Fragment() {
 
     val TAG = "Dashboard"
-    val handlers = listOf(
-        RedHandler(),
-        MainActivity.AccentChildHandler(),
-        MainActivity.BlueHandler()
-    )
-    val router = Router(handlers)
+//    val handlers = listOf(
+//        RedHandler(),
+//        MainActivity.AccentChildHandler(),
+//        MainActivity.BlueHandler()
+//    )
+    val router = Environment.shared.router
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -42,7 +41,7 @@ class DashboardFragment : Fragment() {
         notificationBundle.putBoolean("BOOLEAN_VALUE", true)
 
         val route = Route(
-            URL("https://router.com.au/red"),
+            URL("https://router.com.au/blueblack"),
             notificationBundle,
             this.parentFragmentManager,
             R.id.container
@@ -60,6 +59,37 @@ class DashboardFragment : Fragment() {
                 R.id.container
             )
             router.routeToFragmentWithResultOK(route)
+        }
+
+        tab_switch_to_home.setOnClickListener {
+            val route = Route(
+                URL("https://router.com.au/homeblue"),
+                null,
+                this.parentFragmentManager,
+                R.id.container
+            )
+            router.routeToFragment(route)
+        }
+
+        sequence_actions.setOnClickListener {
+            val route = Route(
+                URL("https://router.com.au/green/1?token=foobar"),
+                null,
+                this.parentFragmentManager,
+                R.id.container
+            )
+            router.routeToFragment(route)
+        }
+
+
+        nav_to_webview.setOnClickListener {
+            val route = Route(
+                URL("https://router.com.au/web"),
+                null,
+                this.parentFragmentManager,
+                R.id.container
+            )
+            router.routeToFragment(route)
         }
     }
 

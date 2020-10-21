@@ -4,8 +4,12 @@ import android.content.Intent
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
+import au.com.princyj.notifications.BlueBlackHandler
 import au.com.princyj.notifications.RedHandler
-import au.com.princyj.router.*
+import au.com.princyj.router.Environment
+import au.com.princyj.router.Route
+import au.com.princyj.router.Router
+import au.com.princyj.router.URLMatcher
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import java.net.URL
 
@@ -20,19 +24,24 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.nautilus_router)
 
-        val toolbar =  findViewById<Toolbar>(R.id.toolbar)
+        initialiseEnvironment()
+        val router = Environment.shared.router
+
+        val toolbar = findViewById<Toolbar>(R.id.toolbar)
         setSupportActionBar(toolbar)
 
         toolbar.setNavigationOnClickListener {
             finish()
         }
 
-        val handlers = listOf(BlueHandler(), AccentHandler(), RedHandler())
-        val router = Router(handlers)
-
 
         bundle.putInt("INDEX", 0)
-        val route = Route(URL("https://router.com.au/blue"), bundle, this.supportFragmentManager, R.id.container)
+        val route = Route(
+            URL("https://router.com.au/blue"),
+            bundle,
+            this.supportFragmentManager,
+            R.id.container
+        )
 
         router.routeToFragment(route)
 
@@ -47,18 +56,36 @@ class MainActivity : AppCompatActivity() {
             when (it.itemId) {
                 R.id.home -> {
                     bundle.putInt("COUNT", count)
-                    val route = Route(URL("https://router.com.au/blue"), bundle, this.supportFragmentManager, R.id.container)
+                    val route = Route(
+                        URL("https://router.com.au/blue"),
+                        bundle,
+                        this.supportFragmentManager,
+                        R.id.container
+                    )
                     router.routeToFragment(route)
+                    bottomNavigation?.isSelected = true
                     true
                 }
                 R.id.dashboard -> {
-                    val route = Route(URL("https://router.com.au/accent"), dashboardBundle, this.supportFragmentManager, R.id.container)
+                    val route = Route(
+                        URL("https://router.com.au/accent"),
+                        dashboardBundle,
+                        this.supportFragmentManager,
+                        R.id.container
+                    )
                     router.routeToFragment(route)
+                    bottomNavigation?.isSelected = true
                     true
                 }
                 R.id.notifications -> {
-                    val route = Route(URL("https://router.com.au/red"), notificationBundle, this.supportFragmentManager, R.id.container)
+                    val route = Route(
+                        URL("https://router.com.au/red"),
+                        notificationBundle,
+                        this.supportFragmentManager,
+                        R.id.container
+                    )
                     router.routeToFragment(route)
+                    bottomNavigation?.isSelected = true
                     true
                 }
                 else -> false
@@ -66,34 +93,28 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    class AccentHandler : RouteHandler {
-
-        override fun handles(url: URL): Boolean {
-            return URLMatcher.pathMatches("/accent", url)
+    private fun initialiseEnvironment() {
+        val handlers = listOf(
+            BlueHandler(),
+            AccentHandler(),
+            RedHandler(),
+            BlueBlackHandler(),
+            AccentChildHandler(),
+            HomeBlueHandler(),
+            GreenHandler()
+        )
+        val router = Router(handlers) {
+            if (URLMatcher.pathMatches("/blueblack", it.url)) {
+                bottomNavigation?.selectedItemId = R.id.notifications
+                bottomNavigation?.isSelected = true
+            } else if (URLMatcher.pathMatches("/homeblue", it.url)) {
+                bottomNavigation?.selectedItemId = R.id.home
+                bottomNavigation?.isSelected = true
+            } else if (URLMatcher.pathMatchesAny(listOf("/green", "/green/(.*)+"), it.url)) {
+                bottomNavigation?.selectedItemId = R.id.home
+                bottomNavigation?.isSelected = true }
         }
-
-        override fun action(route: Route): RouteActionType = RouteActionType.Navigation(DashboardFragment::class.java)
-
-    }
-
-    class BlueHandler : RouteHandler {
-
-        override fun handles(url: URL): Boolean {
-            return URLMatcher.pathMatches("/blue", url)
-        }
-
-        override fun action(route: Route): RouteActionType = RouteActionType.Navigation(HomeFragment::class.java)
-
-    }
-
-    class AccentChildHandler : RouteHandler {
-
-        override fun handles(url: URL): Boolean {
-            return URLMatcher.pathMatches("/accent_child", url)
-        }
-
-        override fun action(route: Route): RouteActionType = RouteActionType.Navigation(DashboardChildFragment::class.java)
-
+        Environment.initialise(router)
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {

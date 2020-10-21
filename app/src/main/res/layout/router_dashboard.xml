@@ -23,6 +23,22 @@
         android:id="@+id/nav_to_child"
         android:text="Go to Dashboard Child Screen"/>
 
+    <Button
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_weight="0"
+        android:gravity="center"
+        android:id="@+id/tab_switch_to_home"
+        android:text="Switch to Home"/>
+
+    <Button
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_weight="0"
+        android:gravity="center"
+        android:id="@+id/sequence_actions"
+        android:text="Show Dialog -> Home"/>
+
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"

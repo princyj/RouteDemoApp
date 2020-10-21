@@ -20,4 +20,13 @@
         android:id="@+id/nav_to_navigation"
         android:text="Go to Parent"/>
 
+
+    <Button
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_weight="0"
+        android:gravity="center"
+        android:id="@+id/tab_switch_to_home"
+        android:text="Switch to Home"/>
+
 </LinearLayout>
